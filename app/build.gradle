@@ -3,6 +3,21 @@ plugins {
 }
 
 android {
+    def releaseSigningPropertiesFile = rootProject.file("signing.properties")
+    def releaseSigningProperties = new Properties()
+    def releaseSigningValue = { key, defaultValue = "" ->
+        def value = releaseSigningProperties.getProperty(key, defaultValue)
+        if (value != null && value.length() >= 2 && ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'")))) {
+            return value.substring(1, value.length() - 1)
+        }
+        return value
+    }
+    if (releaseSigningPropertiesFile.exists()) {
+        releaseSigningPropertiesFile.withInputStream { stream ->
+            releaseSigningProperties.load(stream)
+        }
+    }
+
     dependenciesInfo {
         // Disables dependency metadata when building APKs.
         includeInApk = false
@@ -25,12 +40,26 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            if (releaseSigningPropertiesFile.exists()) {
+                storeFile rootProject.file(releaseSigningValue("storeFile", "app.key"))
+                storePassword releaseSigningValue("storePassword")
+                keyAlias releaseSigningValue("keyAlias")
+                keyPassword releaseSigningValue("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix '.debug'
         }
 
         release {
+            if (releaseSigningPropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
