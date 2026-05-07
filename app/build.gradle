@@ -1,0 +1,81 @@
+plugins {
+    alias(libs.plugins.androidApplication)
+}
+
+android {
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
+    compileSdkVersion 37
+    namespace 'com.apk.editor'
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdk 37
+        versionCode 34
+        versionName "v0.34"
+        vectorDrawables.useSupportLibrary = true
+        testFunctionalTest = false
+        testHandleProfiling = false
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+        }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    flavorDimensions.add("release")
+    productFlavors {
+        play {
+            applicationId "com.apk.explorer"
+            dimension "release"
+        }
+        full {
+            applicationId "com.apk.editor"
+            dimension "release"
+        }
+    }
+    lint {
+        abortOnError false
+    }
+
+}
+
+dependencies {
+    implementation libs.apksig
+    implementation libs.axml
+    implementation libs.crashReporter
+
+    implementation libs.apkutils
+    implementation libs.adapters
+    implementation libs.credits
+    implementation libs.fileutils
+    implementation libs.installerutils
+    implementation libs.packageutils
+    implementation libs.permissionutils
+    implementation libs.themeutils
+    implementation libs.translatorutils
+
+    implementation libs.documentfile
+    implementation libs.material
+    implementation libs.zip4j
+    implementation libs.baksmali
+    implementation libs.smali
+}

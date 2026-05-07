@@ -1,0 +1,32 @@
+[versions]
+apksigVersion = "9.2.0"
+aXMLVersion = "394e0bd599"
+baksmaliVersion = "2.5.2"
+crashreporterVersion = "01df38c1bb"
+documentfileVersion = "1.1.0"
+sCommonVersion = "d532608ca4"
+agpVersion = "9.2.0"
+materialVersion = "1.13.0"
+zip4jVersion = "2.11.6"
+
+[libraries]
+apksig = { module = "com.android.tools.build:apksig", version.ref = "apksigVersion" }
+axml = { module = "com.github.apk-editor:aXML", version.ref = "aXMLVersion" }
+adapters = { module = "com.github.sunilpaulmathew.sCommon:adapters", version.ref = "sCommonVersion" }
+apkutils = { module = "com.github.sunilpaulmathew.sCommon:apkutils", version.ref = "sCommonVersion" }
+baksmali = { module = "org.smali:baksmali", version.ref = "baksmaliVersion" }
+crashReporter = { module = "com.github.sunilpaulmathew:CrashReporter", version.ref = "crashreporterVersion" }
+credits = { module = "com.github.sunilpaulmathew.sCommon:credits", version.ref = "sCommonVersion" }
+documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfileVersion" }
+fileutils = { module = "com.github.sunilpaulmathew.sCommon:fileutils", version.ref = "sCommonVersion" }
+installerutils = { module = "com.github.sunilpaulmathew.sCommon:installerutils", version.ref = "sCommonVersion" }
+packageutils = { module = "com.github.sunilpaulmathew.sCommon:packageutils", version.ref = "sCommonVersion" }
+permissionutils = { module = "com.github.sunilpaulmathew.sCommon:permissionutils", version.ref = "sCommonVersion" }
+smali = { module = "org.smali:smali", version.ref = "baksmaliVersion" }
+themeutils = { module = "com.github.sunilpaulmathew.sCommon:themeutils", version.ref = "sCommonVersion" }
+translatorutils = { module = "com.github.sunilpaulmathew.sCommon:translatorutils", version.ref = "sCommonVersion" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4jVersion" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agpVersion" }

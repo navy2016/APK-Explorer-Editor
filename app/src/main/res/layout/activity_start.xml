@@ -1,0 +1,50 @@
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center" >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@mipmap/ic_launcher_foreground"
+            android:layout_marginBottom="-25sp"
+            android:layout_marginTop="-25sp"
+            android:background="@null" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/warning_message"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold|italic"
+            android:layout_margin="25dp"
+            android:textSize="16sp"
+            android:padding="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/start"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            style="?attr/materialIconButtonFilledTonalStyle"
+            android:textColor="?attr/colorPrimary"
+            app:iconTint="?attr/colorPrimary"
+            android:layout_gravity="center"
+            app:icon="@drawable/ic_start"
+            android:text="@string/start"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            app:iconPadding="10dp"
+            app:iconGravity="end" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.core.widget.NestedScrollView>

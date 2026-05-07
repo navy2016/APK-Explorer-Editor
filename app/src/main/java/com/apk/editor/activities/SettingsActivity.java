@@ -1,0 +1,236 @@
+package com.apk.editor.activities;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.apk.editor.R;
+import com.apk.editor.adapters.SettingsAdapter;
+import com.apk.editor.utils.APKEditorUtils;
+import com.apk.editor.utils.APKSigner;
+import com.apk.editor.utils.AppSettings;
+import com.apk.editor.utils.dialogs.ClearAppSettingsDialog;
+import com.apk.editor.utils.menu.ExploreOptionsMenu;
+
+import java.util.ArrayList;
+
+import in.sunilpaulmathew.sCommon.CommonUtils.sCommonUtils;
+import com.apk.editor.utils.SerializableItems.SettingsItems;
+import in.sunilpaulmathew.sCommon.Dialog.sSingleChoiceDialog;
+import in.sunilpaulmathew.sCommon.FileUtils.sFileUtils;
+import in.sunilpaulmathew.sCommon.ThemeUtils.sThemeUtils;
+
+/*
+ * Created by APK Explorer & Editor <apkeditor@protonmail.com> on March 25, 2021
+ */
+public class SettingsActivity extends BaseActivity {
+
+    private final ArrayList<SettingsItems> mData = new ArrayList<>();
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings, R.id.layout_root);
+
+        AppCompatImageButton mBack = findViewById(R.id.back_button);
+        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        SettingsAdapter mRecycleViewAdapter = new SettingsAdapter(mData);
+        mRecyclerView.setAdapter(mRecycleViewAdapter);
+
+        mData.add(new SettingsItems(null, getString(R.string.user_interface), null));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_theme, this), getString(R.string.app_theme), sThemeUtils.getAppTheme(this)));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_translate, this), getString(R.string.language), AppSettings.getLanguageDescription(this)));
+        mData.add(new SettingsItems(null, getString(R.string.settings_general), null));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_explore, this), getString(R.string.explore_options), AppSettings.getExploreOptions(this)));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_projects, this), getString(R.string.project_exist_action), AppSettings.getProjectExistAction(this)));
+        if (APKEditorUtils.isFullVersion(this)) {
+            mData.add(new SettingsItems(null, getString(R.string.signing_title), null));
+            mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_android_app, this), getString(R.string.export_options), AppSettings.getAPKs(this)));
+            mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_installer, this), getString(R.string.installer_action), AppSettings.getInstallerAction(this)));
+            mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_key, this), getString(R.string.sign_apk_with), AppSettings.getAPKSign(this)));
+        }
+        mData.add(new SettingsItems(null, getString(R.string.settings_misc), null));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_delete, this), getString(R.string.clear_cache), getString(R.string.clear_cache_summary)));
+
+        mRecycleViewAdapter.setOnItemClickListener((position, v) -> {
+            if (mData.get(position).getDescription() != null) {
+                if (position == 1) {
+                    new sSingleChoiceDialog(R.drawable.ic_theme, getString(R.string.app_theme),
+                            AppSettings.getAppThemeMenu(this), AppSettings.getAppThemePosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == AppSettings.getAppThemePosition(SettingsActivity.this)) {
+                                return;
+                            }
+                            switch (itemPosition) {
+                                case 2:
+                                    sCommonUtils.saveInt("appTheme", 2, SettingsActivity.this);
+                                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                                    break;
+                                case 1:
+                                    sCommonUtils.saveInt("appTheme", 1, SettingsActivity.this);
+                                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                                    break;
+                                default:
+                                    sCommonUtils.saveInt("appTheme", 0, SettingsActivity.this);
+                                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                                    break;
+                            }
+                            mData.get(position).setDescription(sThemeUtils.getAppTheme(SettingsActivity.this));
+                            mRecycleViewAdapter.notifyItemChanged(position);
+                        }
+                    }.show();
+                } else if (position == 2) {
+                    AppSettings.setLanguage(this);
+                } else if (position == 4) {
+                    new sSingleChoiceDialog(R.drawable.ic_explore, getString(R.string.explore_options),
+                            ExploreOptionsMenu.getOption(this), AppSettings.getExploreOptionsMenuPosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == 0) {
+                                sCommonUtils.saveString("decompileSetting", getString(R.string.explore_options_simple), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_explore, SettingsActivity.this), getString(R.string.explore_options), AppSettings.getExploreOptions(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else if (itemPosition == 1) {
+                                sCommonUtils.saveString("decompileSetting", getString(R.string.explore_options_full), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_explore, SettingsActivity.this), getString(R.string.explore_options), AppSettings.getExploreOptions(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else if (APKEditorUtils.isFullVersion(SettingsActivity.this) && itemPosition == 2) {
+                                sCommonUtils.saveString("decompileSetting", getString(R.string.explore_options_quick), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_explore, SettingsActivity.this), getString(R.string.explore_options), AppSettings.getExploreOptions(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else {
+                                sCommonUtils.saveString("decompileSetting", null, SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_explore, SettingsActivity.this), getString(R.string.explore_options), AppSettings.getExploreOptions(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    }.show();
+                } else if (position == 5) {
+                    new sSingleChoiceDialog(R.drawable.ic_projects, getString(R.string.project_exist_action),
+                            AppSettings.getProjectExitingMenu(this), AppSettings.getProjectExitingMenuPosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == 0) {
+                                sCommonUtils.saveString("projectAction", getString(R.string.save), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_projects, SettingsActivity.this), getString(R.string.project_exist_action), AppSettings.getProjectExistAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else if (itemPosition == 1) {
+                                sCommonUtils.saveString("projectAction", getString(R.string.delete), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_projects, SettingsActivity.this), getString(R.string.project_exist_action), AppSettings.getProjectExistAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else {
+                                sCommonUtils.saveString("projectAction", null, SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_projects, SettingsActivity.this), getString(R.string.project_exist_action), AppSettings.getProjectExistAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    }.show();
+                } else if (APKEditorUtils.isFullVersion(this) && position == 7) {
+                    new sSingleChoiceDialog(R.drawable.ic_android_app, getString(R.string.export_options),
+                            AppSettings.getExportingAPKMenu(this), AppSettings.getExportingAPKsPosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == 0) {
+                                sCommonUtils.saveString("exportAPKs", getString(R.string.export_storage), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_android_app, SettingsActivity.this), getString(R.string.export_options), AppSettings
+                                        .getAPKs(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else if (itemPosition == 1) {
+                                sCommonUtils.saveString("exportAPKs", getString(R.string.export_resign), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_android_app, SettingsActivity.this), getString(R.string.export_options), AppSettings
+                                        .getAPKs(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else {
+                                sCommonUtils.saveString("exportAPKs", null, SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_android_app, SettingsActivity.this), getString(R.string.export_options), AppSettings
+                                        .getAPKs(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    }.show();
+                } else if (APKEditorUtils.isFullVersion(this) && position == 8) {
+                    new sSingleChoiceDialog(R.drawable.ic_installer, getString(R.string.installer_action),
+                            AppSettings.getInstallerMenu(this), AppSettings.getInstallerMenuPosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == 0) {
+                                sCommonUtils.saveString("installerAction", getString(R.string.install), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_installer, SettingsActivity.this), getString(R.string.installer_action), AppSettings
+                                        .getInstallerAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else if (itemPosition == 1) {
+                                sCommonUtils.saveString("installerAction", getString(R.string.install_resign), SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_installer, SettingsActivity.this), getString(R.string.installer_action), AppSettings
+                                        .getInstallerAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            } else {
+                                sCommonUtils.saveString("installerAction", null, SettingsActivity.this);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_installer, SettingsActivity.this), getString(R.string.installer_action), AppSettings
+                                        .getInstallerAction(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    }.show();
+                } else if (APKEditorUtils.isFullVersion(this) && position == 9) {
+                    new sSingleChoiceDialog(R.drawable.ic_key, getString(R.string.sign_apk_with),
+                            new String[] {
+                                    getString(R.string.sign_apk_default),
+                                    getString(R.string.sign_apk_custom)
+                            }, AppSettings.getAPKSignPosition(this), this) {
+
+                        @Override
+                        public void onItemSelected(int itemPosition) {
+                            if (itemPosition == 0) {
+                                if (AppSettings.isCustomKey(SettingsActivity.this)) {
+                                    if (sFileUtils.exist(APKSigner.getPK8PrivateKey(SettingsActivity.this))) {
+                                        sFileUtils.delete(APKSigner.getPK8PrivateKey(SettingsActivity.this));
+                                    }
+                                    if (sFileUtils.exist(APKSigner.getSigningCredentials(SettingsActivity.this))) {
+                                        sFileUtils.delete(APKSigner.getSigningCredentials(SettingsActivity.this));
+                                    }
+                                    mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                            R.drawable.ic_key, SettingsActivity.this), getString(R.string.sign_apk_with), AppSettings
+                                            .getAPKSign(SettingsActivity.this)));
+                                    mRecycleViewAdapter.notifyItemChanged(position);
+                                }
+                            } else {
+                                Intent signing = new Intent(SettingsActivity.this, APKSignActivity.class);
+                                startActivity(signing);
+                                mData.set(position, new SettingsItems(sCommonUtils.getDrawable(
+                                        R.drawable.ic_key, SettingsActivity.this), getString(R.string.sign_apk_with), AppSettings
+                                        .getAPKSign(SettingsActivity.this)));
+                                mRecycleViewAdapter.notifyItemChanged(position);
+                            }
+                        }
+                    }.show();
+                } else {
+                    new ClearAppSettingsDialog(this);
+                }
+            }
+        });
+
+        mBack.setOnClickListener(v -> finish());
+    }
+
+}
