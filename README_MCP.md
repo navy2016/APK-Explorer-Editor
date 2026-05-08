@@ -1,35 +1,21 @@
 # APK Explorer & Editor MCP 功能
 
-本分支在 APK 反编译/解包后启动一个仅绑定本机回环地址的 MCP/JSON-RPC 服务，方便桌面端 AI 大模型通过 `adb forward` 操作反编译项目文件。
+本分支在 APK 反编译/解包后启动一个仅绑定手机本机回环地址的 MCP/JSON-RPC 服务，方便同一台安卓手机上的 MCP 客户端直接访问 AEE 反编译项目文件。
 
 ## 连接
 
 1. 在手机上打开 AEE，并至少反编译/Explore 一个 APK。
-2. 在电脑执行：
-
-```bash
-adb forward tcp:8765 tcp:8765
-```
-
-3. MCP Streamable HTTP endpoint：
+2. 在 APK Explore 页面底部点击 `M`，进入 MCP 设置页。
+3. 开启 MCP 服务；如需修改端口，在设置页修改并点击“应用端口”。
+4. 在同一台手机上的 MCP 客户端 App 中填写设置页显示的地址。默认：
 
 ```text
-http://127.0.0.1:8765/mcp
+Streamable HTTP: http://127.0.0.1:8765/mcp
+Legacy SSE: http://127.0.0.1:8765/sse
+Health: http://127.0.0.1:8765/health
 ```
 
-Legacy SSE endpoint（给只支持 SSE transport 的 MCP 客户端）：
-
-```text
-http://127.0.0.1:8765/sse
-```
-
-端口可在 AEE 的 MCP 服务设置页面自定义；如果修改端口，请同步修改 `adb forward` 两侧端口。
-
-健康检查：
-
-```bash
-curl http://127.0.0.1:8765/health
-```
+同机使用无需电脑或命令行操作。端口可在 AEE 的 MCP 服务设置页面自定义；如果修改端口，请在 MCP 客户端中同步修改 URL 端口。
 
 ## 支持的传输
 

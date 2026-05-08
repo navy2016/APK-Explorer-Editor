@@ -230,14 +230,16 @@
     <string name="mcp_logs_title">Live tool call log</string>
     <string name="mcp_logs_clear">Clear logs</string>
     <string name="mcp_logs_empty">No MCP calls yet.</string>
-    <string name="mcp_server_message">The MCP server is a local bridge for AI clients.
+    <string name="mcp_same_phone_hint">Use on the same Android phone: keep this service enabled, then paste the Streamable HTTP URL below into your MCP client app.</string>
+    <string name="mcp_same_phone_endpoint">Streamable HTTP: %1$s\nLegacy SSE: %2$s\nHealth: %3$s</string>
+    <string name="mcp_copy_url">Copy MCP URL</string>
+    <string name="mcp_url_copied">MCP URL copied</string>
+    <string name="mcp_streamable_http">MCP Streamable HTTP</string>
+    <string name="mcp_server_message">The MCP server is a local bridge for AI clients running on this Android phone.
 
 1. Explore/decompile at least one APK project in AEE.
-2. On your computer run:
-
-adb forward tcp:8765 tcp:8765
-
-3. Configure your MCP client:
+2. Enable MCP in this page.
+3. In your MCP client app on the same phone, use:
 
 Streamable HTTP: http://127.0.0.1:8765/mcp
 Legacy SSE: http://127.0.0.1:8765/sse

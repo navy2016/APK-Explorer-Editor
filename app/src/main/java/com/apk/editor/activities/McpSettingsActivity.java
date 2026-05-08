@@ -1,5 +1,8 @@
 package com.apk.editor.activities;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,7 +27,7 @@ import in.sunilpaulmathew.sCommon.CommonUtils.sCommonUtils;
 public class McpSettingsActivity extends BaseActivity {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private MaterialTextView mStatus, mLogView;
+    private MaterialTextView mStatus, mEndpoints, mLogView;
     private TextInputEditText mPortInput;
     private SwitchMaterial mEnableSwitch;
     private boolean mInternalChange;
@@ -45,10 +48,12 @@ public class McpSettingsActivity extends BaseActivity {
 
         AppCompatImageButton back = findViewById(R.id.back_button);
         mStatus = findViewById(R.id.mcp_status);
+        mEndpoints = findViewById(R.id.mcp_endpoints);
         mLogView = findViewById(R.id.mcp_logs);
         mPortInput = findViewById(R.id.mcp_port);
         mEnableSwitch = findViewById(R.id.mcp_enable);
         MaterialButton applyPort = findViewById(R.id.apply_port);
+        MaterialButton copyUrl = findViewById(R.id.copy_mcp_url);
         MaterialButton clearLogs = findViewById(R.id.clear_logs);
 
         back.setOnClickListener(v -> finish());
@@ -75,6 +80,11 @@ public class McpSettingsActivity extends BaseActivity {
                 McpServer.get(this).start(port);
             }
             refreshStatus();
+        });
+
+        copyUrl.setOnClickListener(v -> {
+            copyToClipboard(getString(R.string.mcp_streamable_http), getMcpUrl());
+            sCommonUtils.toast(getString(R.string.mcp_url_copied), this).show();
         });
 
         clearLogs.setOnClickListener(v -> {
@@ -128,6 +138,28 @@ public class McpSettingsActivity extends BaseActivity {
         mStatus.setText(running
                 ? getString(R.string.mcp_server_running_port, McpServer.get(this).getPort())
                 : getString(R.string.mcp_server_stopped));
+        refreshEndpoints();
+    }
+
+    private void refreshEndpoints() {
+        int port = McpServer.get(this).isRunning() ? McpServer.get(this).getPort() : parsePort();
+        String base = "http://127.0.0.1:" + port;
+        mEndpoints.setText(getString(R.string.mcp_same_phone_endpoint,
+                base + "/mcp",
+                base + "/sse",
+                base + "/health"));
+    }
+
+    private String getMcpUrl() {
+        int port = McpServer.get(this).isRunning() ? McpServer.get(this).getPort() : parsePort();
+        return "http://127.0.0.1:" + port + "/mcp";
+    }
+
+    private void copyToClipboard(String label, String value) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(ClipData.newPlainText(label, value));
+        }
     }
 
     private void refreshLogs() {
