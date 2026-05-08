@@ -223,4 +223,21 @@
     <string name="xml_editor_storage">"从设备存储"</string>
     <string name="xml_editor_text">"按硬编码"</string>
     <string name="xml_modify_title">"更改此值为"</string>
+    <string name="mcp_server">MCP 服务</string>
+    <string name="mcp_server_running">运行中：127.0.0.1:8765</string>
+    <string name="mcp_server_stopped">已停止。点击启动本地 MCP 服务</string>
+    <string name="mcp_server_message">MCP 服务用于让 AI 客户端访问 AEE 的反编译项目。
+
+1. 先在 AEE 里反编译/Explore 至少一个 APK 项目。
+2. 在电脑执行：
+
+adb forward tcp:8765 tcp:8765
+
+3. 在 MCP 客户端中配置：
+
+Streamable HTTP: http://127.0.0.1:8765/mcp
+Legacy SSE: http://127.0.0.1:8765/sse
+健康检查: http://127.0.0.1:8765/health
+
+服务只监听手机本机回环地址，并且只能访问 AEE 项目文件。</string>
 </resources>

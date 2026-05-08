@@ -39,11 +39,13 @@ public class SettingsAdapter extends RecyclerView.Adapter<SettingsAdapter.ViewHo
     public void onBindViewHolder(@NonNull SettingsAdapter.ViewHolder holder, int position) {
         holder.Title.setText(data.get(position).getTitle());
         if (data.get(position).getDescription() != null) {
+            holder.Description.setVisibility(View.VISIBLE);
             holder.Description.setText(data.get(position).getDescription());
         } else {
             holder.Description.setVisibility(View.GONE);
         }
         if (data.get(position).getIcon() != null) {
+            holder.mIcon.setVisibility(View.VISIBLE);
             holder.mIcon.setImageDrawable(data.get(position).getIcon());
         } else {
             holder.mIcon.setVisibility(View.GONE);

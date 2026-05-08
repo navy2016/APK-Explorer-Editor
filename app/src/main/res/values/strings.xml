@@ -217,4 +217,21 @@
     <string name="xml_modify_title">Modify this value to</string>
     <string name="yes">Yes</string>
     <string name="zip_aligning">Zip aligning…</string>
+    <string name="mcp_server">MCP Server</string>
+    <string name="mcp_server_running">Running at 127.0.0.1:8765</string>
+    <string name="mcp_server_stopped">Stopped. Tap to start local MCP server</string>
+    <string name="mcp_server_message">The MCP server is a local bridge for AI clients.
+
+1. Explore/decompile at least one APK project in AEE.
+2. On your computer run:
+
+adb forward tcp:8765 tcp:8765
+
+3. Configure your MCP client:
+
+Streamable HTTP: http://127.0.0.1:8765/mcp
+Legacy SSE: http://127.0.0.1:8765/sse
+Health: http://127.0.0.1:8765/health
+
+The server listens on the phone loopback address only and can only access AEE project files.</string>
 </resources>

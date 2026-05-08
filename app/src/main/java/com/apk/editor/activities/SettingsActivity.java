@@ -17,6 +17,8 @@ import com.apk.editor.utils.APKSigner;
 import com.apk.editor.utils.AppSettings;
 import com.apk.editor.utils.dialogs.ClearAppSettingsDialog;
 import com.apk.editor.utils.menu.ExploreOptionsMenu;
+import com.apk.editor.mcp.McpServer;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 
@@ -59,10 +61,15 @@ public class SettingsActivity extends BaseActivity {
             mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_key, this), getString(R.string.sign_apk_with), AppSettings.getAPKSign(this)));
         }
         mData.add(new SettingsItems(null, getString(R.string.settings_misc), null));
+        mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_support, this), getString(R.string.mcp_server), getMcpServerSummary()));
         mData.add(new SettingsItems(sCommonUtils.getDrawable(R.drawable.ic_delete, this), getString(R.string.clear_cache), getString(R.string.clear_cache_summary)));
 
         mRecycleViewAdapter.setOnItemClickListener((position, v) -> {
             if (mData.get(position).getDescription() != null) {
+                if (getString(R.string.mcp_server).equals(mData.get(position).getTitle())) {
+                    showMcpServerDialog(position, mRecycleViewAdapter);
+                    return;
+                }
                 if (position == 1) {
                     new sSingleChoiceDialog(R.drawable.ic_theme, getString(R.string.app_theme),
                             AppSettings.getAppThemeMenu(this), AppSettings.getAppThemePosition(this), this) {
@@ -231,6 +238,29 @@ public class SettingsActivity extends BaseActivity {
         });
 
         mBack.setOnClickListener(v -> finish());
+    }
+
+    private String getMcpServerSummary() {
+        return getString(McpServer.get(this).isRunning() ? R.string.mcp_server_running : R.string.mcp_server_stopped);
+    }
+
+    private void showMcpServerDialog(int position, SettingsAdapter adapter) {
+        McpServer.start(this);
+        mData.get(position).setDescription(getMcpServerSummary());
+        adapter.notifyItemChanged(position);
+
+        new MaterialAlertDialogBuilder(this)
+                .setIcon(R.drawable.ic_support)
+                .setTitle(R.string.mcp_server)
+                .setMessage(getString(R.string.mcp_server_message))
+                .setNegativeButton(R.string.cancel, (dialog, id) -> {
+                })
+                .setPositiveButton(R.string.start, (dialog, id) -> {
+                    McpServer.start(SettingsActivity.this);
+                    mData.get(position).setDescription(getMcpServerSummary());
+                    adapter.notifyItemChanged(position);
+                })
+                .show();
     }
 
 }
