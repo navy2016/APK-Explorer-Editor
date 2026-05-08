@@ -216,6 +216,7 @@ public final class McpServer {
 
             if ("POST".equals(request.method) && ("/mcp".equals(request.path) || "/jsonrpc".equals(request.path))) {
                 JSONObject response = handleJsonRpc(new JSONObject(new String(request.body, StandardCharsets.UTF_8)));
+                if (response == null) return;
                 if (acceptsSse(request)) {
                     writeSseResponse(output, response);
                 } else {
@@ -275,7 +276,9 @@ public final class McpServer {
             return;
         }
         JSONObject response = handleJsonRpc(new JSONObject(new String(request.body, StandardCharsets.UTF_8)));
-        session.event("message", response.toString());
+        if (response != null) {
+            session.event("message", response.toString());
+        }
         writeText(output, 202, "Accepted");
     }
 
@@ -293,7 +296,8 @@ public final class McpServer {
     }
 
     private JSONObject handleJsonRpc(JSONObject request) throws JSONException {
-        Object id = request.has("id") ? request.opt("id") : JSONObject.NULL;
+        boolean isNotification = !request.has("id") || request.isNull("id");
+        Object id = isNotification ? null : request.opt("id");
         String method = request.optString("method", "");
         addLog("RPC", method.isEmpty() ? "<empty>" : method);
         JSONObject params = request.optJSONObject("params");
@@ -304,24 +308,24 @@ public final class McpServer {
                 case "initialize":
                     return successResponse(id, initializeResult());
                 case "notifications/initialized":
-                    return successResponse(id, new JSONObject());
+                    return null;
                 case "ping":
-                    return successResponse(id, new JSONObject());
+                    return isNotification ? null : successResponse(id, new JSONObject());
                 case "tools/list":
-                    return successResponse(id, new JSONObject().put("tools", tools()));
+                    return isNotification ? null : successResponse(id, new JSONObject().put("tools", tools()));
                 case "tools/call":
-                    return successResponse(id, callTool(params));
+                    return isNotification ? null : successResponse(id, callTool(params));
                 case "resources/list":
-                    return successResponse(id, resourcesList());
+                    return isNotification ? null : successResponse(id, resourcesList());
                 case "resources/read":
-                    return successResponse(id, resourcesRead(params));
+                    return isNotification ? null : successResponse(id, resourcesRead(params));
                 default:
-                    return errorResponse(id, -32601, "Unknown method: " + method);
+                    return isNotification ? null : errorResponse(id, -32601, "Unknown method: " + method);
             }
         } catch (IllegalArgumentException e) {
-            return errorResponse(id, -32602, e.getMessage());
+            return isNotification ? null : errorResponse(id, -32602, e.getMessage());
         } catch (Exception e) {
-            return errorResponse(id, -32603, e.getMessage() == null ? e.toString() : e.getMessage());
+            return isNotification ? null : errorResponse(id, -32603, e.getMessage() == null ? e.toString() : e.getMessage());
         }
     }
 
