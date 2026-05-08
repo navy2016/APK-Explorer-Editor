@@ -216,7 +216,10 @@ public final class McpServer {
 
             if ("POST".equals(request.method) && ("/mcp".equals(request.path) || "/jsonrpc".equals(request.path))) {
                 JSONObject response = handleJsonRpc(new JSONObject(new String(request.body, StandardCharsets.UTF_8)));
-                if (response == null) return;
+                if (response == null) {
+                    writeText(output, 202, "Accepted");
+                    return;
+                }
                 if (acceptsSse(request)) {
                     writeSseResponse(output, response);
                 } else {
