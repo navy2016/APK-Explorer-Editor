@@ -154,6 +154,7 @@ public class ExploreAPK extends sExecutor {
     public void onPostExecute() {
         if (mExplorePath.exists()) {
             Common.setFinishStatus(mContext);
+            sCommonUtils.saveBoolean("mcpServerEnabled", true, mContext);
             McpServer.start(mContext);
             Intent explorer = new Intent(mContext, APKExploreActivity.class);
             explorer.putExtra(APKExploreActivity.BACKUP_PATH_INTENT, mAPKDetailsFile.getAbsolutePath());

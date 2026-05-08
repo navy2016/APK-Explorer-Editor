@@ -245,20 +245,24 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void showMcpServerDialog(int position, SettingsAdapter adapter) {
-        McpServer.start(this);
-        mData.get(position).setDescription(getMcpServerSummary());
-        adapter.notifyItemChanged(position);
-
+        boolean running = McpServer.get(this).isRunning();
         new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_support)
                 .setTitle(R.string.mcp_server)
                 .setMessage(getString(R.string.mcp_server_message))
                 .setNegativeButton(R.string.cancel, (dialog, id) -> {
                 })
-                .setPositiveButton(R.string.start, (dialog, id) -> {
-                    McpServer.start(SettingsActivity.this);
+                .setPositiveButton(running ? R.string.mcp_server_stop : R.string.mcp_server_start, (dialog, id) -> {
+                    if (running) {
+                        McpServer.get(SettingsActivity.this).stop();
+                        sCommonUtils.saveBoolean("mcpServerEnabled", false, SettingsActivity.this);
+                    } else {
+                        McpServer.start(SettingsActivity.this);
+                        sCommonUtils.saveBoolean("mcpServerEnabled", McpServer.get(SettingsActivity.this).isRunning(), SettingsActivity.this);
+                    }
                     mData.get(position).setDescription(getMcpServerSummary());
                     adapter.notifyItemChanged(position);
+                    sCommonUtils.toast(getMcpServerSummary(), SettingsActivity.this).show();
                 })
                 .show();
     }

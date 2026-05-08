@@ -46,6 +46,19 @@
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/mcp_server"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|end"
+        android:gravity="center_vertical"
+        android:src="@drawable/ic_start"
+        android:layout_marginEnd="48dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:background="@null"
+        android:visibility="gone" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/build"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

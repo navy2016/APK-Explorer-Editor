@@ -42,7 +42,9 @@ public class MainActivity extends AppCompatActivity {
         AppSettings.initializeAppLanguage(this);
 
         new CrashReporter("E-Mail: apkeditor@protonmail.com", this).initialize();
-        McpServer.start(this);
+        if (sCommonUtils.getBoolean("mcpServerEnabled", true, this)) {
+            McpServer.start(this);
+        }
 
         BottomNavigationView mBottomNav = findViewById(R.id.bottom_navigation);
         FrameLayout mFragmentContainer = findViewById(R.id.fragment_container);
