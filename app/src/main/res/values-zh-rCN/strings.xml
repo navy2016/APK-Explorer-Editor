@@ -229,6 +229,13 @@
     <string name="mcp_server_start">启动 MCP</string>
     <string name="mcp_server_stop">停止 MCP</string>
     <string name="mcp_server_failed">MCP 服务启动失败</string>
+    <string name="mcp_server_running_port">运行中：127.0.0.1:%1$d</string>
+    <string name="mcp_server_enable">开启 MCP 服务</string>
+    <string name="mcp_server_port">MCP 服务端口</string>
+    <string name="mcp_apply_port">应用端口</string>
+    <string name="mcp_logs_title">工具调用实时记录</string>
+    <string name="mcp_logs_clear">清空记录</string>
+    <string name="mcp_logs_empty">暂无 MCP 调用记录。</string>
     <string name="mcp_server_message">MCP 服务用于让 AI 客户端访问 AEE 的反编译项目。
 
 1. 先在 AEE 里反编译/Explore 至少一个 APK 项目。

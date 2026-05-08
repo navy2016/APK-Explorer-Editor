@@ -67,7 +67,7 @@ public class SettingsActivity extends BaseActivity {
         mRecycleViewAdapter.setOnItemClickListener((position, v) -> {
             if (mData.get(position).getDescription() != null) {
                 if (getString(R.string.mcp_server).equals(mData.get(position).getTitle())) {
-                    showMcpServerDialog(position, mRecycleViewAdapter);
+                    startActivity(new Intent(SettingsActivity.this, McpSettingsActivity.class));
                     return;
                 }
                 if (position == 1) {
@@ -241,7 +241,9 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private String getMcpServerSummary() {
-        return getString(McpServer.get(this).isRunning() ? R.string.mcp_server_running : R.string.mcp_server_stopped);
+        return McpServer.get(this).isRunning()
+                ? getString(R.string.mcp_server_running_port, McpServer.get(this).getPort())
+                : getString(R.string.mcp_server_stopped);
     }
 
     private void showMcpServerDialog(int position, SettingsAdapter adapter) {

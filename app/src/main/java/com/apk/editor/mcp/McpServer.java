@@ -3,6 +3,8 @@ package com.apk.editor.mcp;
 import android.content.Context;
 import android.util.Log;
 
+import in.sunilpaulmathew.sCommon.CommonUtils.sCommonUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +58,10 @@ public final class McpServer {
     private static final int DEFAULT_SEARCH_LIMIT = 100;
     private static final int MAX_SEARCH_LIMIT = 1000;
     private static final long SSE_KEEPALIVE_MS = 15000L;
+    private static final int MIN_PORT = 1024;
+    private static final int MAX_PORT = 65535;
+    private static final int MAX_LOG_ENTRIES = 200;
+    private static final List<String> sLogs = Collections.synchronizedList(new ArrayList<>());
 
     private static McpServer sInstance;
 
@@ -66,6 +72,7 @@ public final class McpServer {
     private final Map<String, SseSession> mSseSessions = new ConcurrentHashMap<>();
     private ServerSocket mServerSocket;
     private Thread mAcceptThread;
+    private int mPort = DEFAULT_PORT;
 
     private McpServer(Context context) {
         mAppContext = context.getApplicationContext();
@@ -80,20 +87,25 @@ public final class McpServer {
     }
 
     public static void start(Context context) {
-        get(context).start(DEFAULT_PORT);
+        get(context).start(sCommonUtils.getInt("mcpServerPort", DEFAULT_PORT, context));
     }
 
     public synchronized void start(int port) {
-        if (mRunning.get()) return;
+        int safePort = normalizePort(port);
+        if (mRunning.get() && mPort == safePort) return;
+        if (mRunning.get()) stop();
         try {
-            mServerSocket = new ServerSocket(port, 50, InetAddress.getByName("127.0.0.1"));
+            mServerSocket = new ServerSocket(safePort, 50, InetAddress.getByName("127.0.0.1"));
+            mPort = safePort;
             mRunning.set(true);
-            mAcceptThread = new Thread(() -> acceptLoop(port), "AEE MCP Server");
+            mAcceptThread = new Thread(() -> acceptLoop(safePort), "AEE MCP Server");
             mAcceptThread.setDaemon(true);
             mAcceptThread.start();
-            Log.i(TAG, "MCP server listening on 127.0.0.1:" + port);
+            addLog("SERVER", "started on 127.0.0.1:" + safePort);
+            Log.i(TAG, "MCP server listening on 127.0.0.1:" + safePort);
         } catch (IOException e) {
             mRunning.set(false);
+            addLog("ERROR", "failed to start on port " + safePort + ": " + (e.getMessage() == null ? e.toString() : e.getMessage()));
             Log.e(TAG, "Failed to start MCP server", e);
         }
     }
@@ -111,10 +123,42 @@ public final class McpServer {
             }
         }
         mServerSocket = null;
+        addLog("SERVER", "stopped");
     }
 
     public boolean isRunning() {
         return mRunning.get();
+    }
+
+    public int getPort() {
+        return mPort;
+    }
+
+    public static int normalizePort(int port) {
+        return port >= MIN_PORT && port <= MAX_PORT ? port : DEFAULT_PORT;
+    }
+
+    public static List<String> getLogs() {
+        synchronized (sLogs) {
+            return new ArrayList<>(sLogs);
+        }
+    }
+
+    public static void clearLogs() {
+        synchronized (sLogs) {
+            sLogs.clear();
+        }
+    }
+
+    private static void addLog(String type, String message) {
+        String entry = String.format(Locale.US, "%1$tH:%1$tM:%1$tS  %2$s  %3$s", System.currentTimeMillis(), type, message);
+        synchronized (sLogs) {
+            sLogs.add(0, entry);
+            while (sLogs.size() > MAX_LOG_ENTRIES) {
+                sLogs.remove(sLogs.size() - 1);
+            }
+        }
+        Log.d(TAG, entry);
     }
 
     private void acceptLoop(int port) {
@@ -137,6 +181,7 @@ public final class McpServer {
              OutputStream output = new BufferedOutputStream(s.getOutputStream())) {
             HttpRequest request = HttpRequest.read(input);
             if (request == null) return;
+            addLog("HTTP", request.method + " " + request.path);
 
             if ("OPTIONS".equals(request.method)) {
                 writeOptions(output);
@@ -149,7 +194,7 @@ public final class McpServer {
                         .put("name", "APK Explorer & Editor MCP")
                         .put("endpoint", "/mcp")
                         .put("sseEndpoint", "/sse")
-                        .put("port", DEFAULT_PORT)
+                        .put("port", mPort)
                         .put("projectsRoot", mProjectsRoot.getAbsolutePath())
                         .put("transports", new JSONArray()
                                 .put("streamable-http")
@@ -182,6 +227,7 @@ public final class McpServer {
             writeText(output, 404, "Not Found");
         } catch (SocketTimeoutException ignored) {
         } catch (Exception e) {
+            addLog("ERROR", e.getMessage() == null ? e.toString() : e.getMessage());
             try {
                 JSONObject error = errorResponse(null, -32603, e.getMessage() == null ? e.toString() : e.getMessage());
                 writeJson(new BufferedOutputStream(socket.getOutputStream()), 200, error);
@@ -249,6 +295,7 @@ public final class McpServer {
     private JSONObject handleJsonRpc(JSONObject request) throws JSONException {
         Object id = request.has("id") ? request.opt("id") : JSONObject.NULL;
         String method = request.optString("method", "");
+        addLog("RPC", method.isEmpty() ? "<empty>" : method);
         JSONObject params = request.optJSONObject("params");
         if (params == null) params = new JSONObject();
 
@@ -348,6 +395,7 @@ public final class McpServer {
     private JSONObject callTool(JSONObject params) throws Exception {
         String name = params.optString("name", "");
         JSONObject args = params.optJSONObject("arguments");
+        addLog("TOOL", name.isEmpty() ? "<empty>" : name);
         if (args == null) args = new JSONObject();
 
         JSONObject result;

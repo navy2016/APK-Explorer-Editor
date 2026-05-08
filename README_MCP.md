@@ -23,6 +23,8 @@ Legacy SSE endpoint（给只支持 SSE transport 的 MCP 客户端）：
 http://127.0.0.1:8765/sse
 ```
 
+端口可在 AEE 的 MCP 服务设置页面自定义；如果修改端口，请同步修改 `adb forward` 两侧端口。
+
 健康检查：
 
 ```bash

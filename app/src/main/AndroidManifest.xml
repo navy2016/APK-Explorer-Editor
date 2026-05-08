@@ -41,6 +41,9 @@
         <activity android:name=".activities.SettingsActivity"
             android:exported="false" />
 
+        <activity android:name=".activities.McpSettingsActivity"
+            android:exported="false" />
+
         <activity android:name=".activities.StartActivity"
             android:exported="false" />
 

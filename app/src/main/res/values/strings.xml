@@ -223,6 +223,13 @@
     <string name="mcp_server_start">Start MCP</string>
     <string name="mcp_server_stop">Stop MCP</string>
     <string name="mcp_server_failed">Failed to start MCP server</string>
+    <string name="mcp_server_running_port">Running at 127.0.0.1:%1$d</string>
+    <string name="mcp_server_enable">Enable MCP server</string>
+    <string name="mcp_server_port">MCP server port</string>
+    <string name="mcp_apply_port">Apply port</string>
+    <string name="mcp_logs_title">Live tool call log</string>
+    <string name="mcp_logs_clear">Clear logs</string>
+    <string name="mcp_logs_empty">No MCP calls yet.</string>
     <string name="mcp_server_message">The MCP server is a local bridge for AI clients.
 
 1. Explore/decompile at least one APK project in AEE.

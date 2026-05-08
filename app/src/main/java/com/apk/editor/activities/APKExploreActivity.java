@@ -22,7 +22,6 @@ import com.apk.editor.fragments.StringViewFragment;
 import com.apk.editor.utils.APKEditorUtils;
 import com.apk.editor.utils.APKExplorer;
 import com.apk.editor.utils.tasks.SignAPK;
-import com.apk.editor.mcp.McpServer;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textview.MaterialTextView;
@@ -48,7 +47,6 @@ public class APKExploreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_apkexplorer);
 
         AppCompatImageButton mBuild = findViewById(R.id.build);
-        AppCompatImageButton mMcpServer = findViewById(R.id.mcp_server);
         AppCompatImageView mApplicationIcon = findViewById(R.id.app_image);
         BottomNavigationView mBottomNav = findViewById(R.id.bottom_navigation);
         FrameLayout mFragmentContainer = findViewById(R.id.fragment_container);
@@ -75,10 +73,6 @@ public class APKExploreActivity extends AppCompatActivity {
         if (APKEditorUtils.isFullVersion(this)) {
             mBuild.setVisibility(View.VISIBLE);
         }
-        mMcpServer.setVisibility(View.VISIBLE);
-        updateMcpButton(mMcpServer);
-        mMcpServer.setOnClickListener(v -> showMcpServerDialog(mMcpServer));
-
         mBuild.setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
                 .setIcon(R.mipmap.ic_launcher)
                 .setTitle(R.string.app_name)
@@ -115,6 +109,7 @@ public class APKExploreActivity extends AppCompatActivity {
         if (sFileUtils.exist(mBackupFilePath.replace("/.aeeBackup/appData", "/resources.arsc"))) {
             menu.add(Menu.NONE, 2, Menu.NONE, null).setIcon(R.drawable.ic_string);
         }
+        menu.add(Menu.NONE, 3, Menu.NONE, null).setIcon(R.drawable.ic_mcp);
 
         mBottomNav.setOnItemSelectedListener(
                 menuItem -> {
@@ -128,6 +123,9 @@ public class APKExploreActivity extends AppCompatActivity {
                         case 2:
                             mFragment = getStringFragment(mBackupFilePath.replace("/.aeeBackup/appData", "/resources.arsc"));
                             break;
+                        case 3:
+                            startActivity(new Intent(APKExploreActivity.this, McpSettingsActivity.class));
+                            return true;
                     }
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                             mFragment).commit();
@@ -141,34 +139,6 @@ public class APKExploreActivity extends AppCompatActivity {
         }
 
         mBottomNav.post(() -> mFragmentContainer.setPadding(0, 0, 0, mBottomNav.getHeight()));
-    }
-
-    private void updateMcpButton(AppCompatImageButton button) {
-        button.setImageResource(McpServer.get(this).isRunning() ? R.drawable.ic_cancel : R.drawable.ic_start);
-        button.setContentDescription(getString(R.string.mcp_server));
-    }
-
-    private void showMcpServerDialog(AppCompatImageButton button) {
-        boolean running = McpServer.get(this).isRunning();
-        new MaterialAlertDialogBuilder(this)
-                .setIcon(R.drawable.ic_support)
-                .setTitle(R.string.mcp_server)
-                .setMessage(getString(R.string.mcp_server_message))
-                .setNegativeButton(R.string.cancel, (dialog, id) -> {
-                })
-                .setPositiveButton(running ? R.string.mcp_server_stop : R.string.mcp_server_start, (dialog, id) -> {
-                    if (running) {
-                        McpServer.get(APKExploreActivity.this).stop();
-                        sCommonUtils.saveBoolean("mcpServerEnabled", false, APKExploreActivity.this);
-                    } else {
-                        McpServer.start(APKExploreActivity.this);
-                        sCommonUtils.saveBoolean("mcpServerEnabled", McpServer.get(APKExploreActivity.this).isRunning(), APKExploreActivity.this);
-                    }
-                    updateMcpButton(button);
-                    sCommonUtils.toast(getString(McpServer.get(APKExploreActivity.this).isRunning()
-                            ? R.string.mcp_server_running : R.string.mcp_server_stopped), APKExploreActivity.this).show();
-                })
-                .show();
     }
 
     private Fragment getAPKExplorerFragment(String backupFilePath, String packageName) {
